@@ -203,7 +203,7 @@
           <input id="excel-upload-input" type="file" accept=".xlsx,.xls,.csv" class="hidden">
         </label>
 
-        <button id="btn-run-ai" type="button" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-900/40">
+        <button id="btn-run-ai" type="button" class="hidden items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-900/40">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
@@ -215,13 +215,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
           </svg>
           <span>Exportar JSON Forense</span>
-        </button>
-
-        <button id="btn-export-pdf-top" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white transition shadow-lg shadow-blue-900/50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          <span>Exportar PDF Único</span>
         </button>
       </div>
     </div>
@@ -3081,6 +3074,18 @@ iisreset /restart`
       const target = document.getElementById('tab-' + tabId);
       if (target) target.classList.remove('hidden');
 
+      // Re-Analizar con IA sólo visible desde la opción 2 (Análisis IA e incidentes)
+      const btnRunAi = document.getElementById('btn-run-ai');
+      if (btnRunAi) {
+        if (tabId === 'ai-agents') {
+          btnRunAi.classList.remove('hidden');
+          btnRunAi.classList.add('inline-flex');
+        } else {
+          btnRunAi.classList.add('hidden');
+          btnRunAi.classList.remove('inline-flex');
+        }
+      }
+
       document.querySelectorAll('.nav-tab-btn').forEach(btn => {
         if (btn.getAttribute('data-tab') === tabId) {
           btn.className = 'nav-tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 bg-blue-600/20 text-blue-400 border border-blue-500/40';
@@ -3472,7 +3477,8 @@ iisreset /restart`
       // Export Forensic JSON and PDF buttons
       const btnExportJson = document.getElementById('btn-export-json-top');
       if (btnExportJson) btnExportJson.addEventListener('click', exportForensicJSON);
-      document.getElementById('btn-export-pdf-top').addEventListener('click', exportUnifiedPDF);
+      const btnExportPdfTop = document.getElementById('btn-export-pdf-top');
+      if (btnExportPdfTop) btnExportPdfTop.addEventListener('click', exportUnifiedPDF);
       document.getElementById('btn-export-pdf-main').addEventListener('click', exportUnifiedPDF);
       document.getElementById('btn-print-report').addEventListener('click', () => {
         document.getElementById('report-section-exec').classList.remove('hidden');
