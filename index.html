@@ -355,56 +355,56 @@
 
     <!-- ================= TAB 1: DASHBOARD ================= -->
     <section id="tab-dashboard" class="tab-panel space-y-6">
-      <!-- Wazuh SIEM / XDR Inspired Module Header: Endpoint Security, Threat Intelligence & Monitored Agents Summary -->
+      <!-- Arquitectura Operativa Real: Análisis Forense de Exportaciones SIEM (SOC L2) -->
       <div class="wazuh-module-card rounded-2xl p-4">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-slate-800">
           <div class="flex items-center gap-3">
             <span class="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-blue-600/20 text-blue-400 border border-blue-500/40">
-              Wazuh XDR / SIEM Architecture
+              Módulo de Análisis Forense SIEM (SOC L2)
             </span>
             <div class="text-xs text-slate-300 font-mono">
-              <span class="text-slate-400">Index Pattern:</span> <strong class="text-white">siem-export-2026.10.23*</strong>
+              <span class="text-slate-400">Origen de Datos:</span> <strong id="dash-file-title" class="text-white">Exportación SIEM (.xlsx / .csv)</strong>
               <span class="mx-2 text-slate-600">|</span>
-              <span class="text-slate-400">Módulos Activos:</span> <strong class="text-cyan-300">Threat Hunting · MITRE ATT&amp;CK · FIM · Active Response</strong>
+              <span class="text-slate-400">Capacidades Activas:</span> <strong class="text-cyan-300">Auditoría de Eventos · Correlación Heurística · MITRE ATT&amp;CK · Detección de Anomalías</strong>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono">
-            <span class="px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">● Agentes Monitoreados (Hosts): <strong>11 Activos</strong></span>
-            <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-300 border border-red-500/30">▲ Reglas Nivel ≥12 (Riesgo Alto IA): <strong>41</strong></span>
-            <span class="px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">◆ Reglas Nivel 7–11 (Riesgo Medio IA): <strong>82</strong></span>
-            <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">○ Reglas Nivel 1–6 (Riesgo Bajo IA): <strong>592</strong></span>
+            <span class="px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">● Hosts Auditados: <strong>11 Equipos</strong></span>
+            <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-300 border border-red-500/30">▲ Eventos Críticos (Riesgo Alto): <strong>41</strong></span>
+            <span class="px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">◆ Eventos Sospechosos (Riesgo Medio): <strong>82</strong></span>
+            <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">○ Eventos Operativos (Riesgo Bajo): <strong>592</strong></span>
           </div>
         </div>
 
-        <!-- Wazuh 4 Core Pillars Quick Access (Endpoint Security, Threat Intelligence, Security Operations, Cloud/Network Security) -->
+        <!-- 4 Pilares Funcionales Reales de la Plataforma -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 text-xs">
           <div class="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400">1. Endpoint Security &amp; FIM</span>
-              <span class="font-mono text-[10px] text-slate-400">11 Agentes</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400">1. Alcance de Auditoría</span>
+              <span class="font-mono text-[10px] text-slate-400">11 Hosts</span>
             </div>
-            <p class="text-[11px] text-slate-300 mt-1">Monitoreo de integridad de archivos (<code class="font-mono text-amber-300">Finance\Budget2027.xlsx</code>, <code class="font-mono text-amber-300">archive.7z</code>) y servicios (<code class="font-mono text-amber-300">WinUpdateHelper</code>).</p>
+            <p class="text-[11px] text-slate-300 mt-1">Inspección de eventos en controladores de dominio, servidores de archivos, base de datos y estaciones de trabajo.</p>
           </div>
           <div class="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">2. Threat Intelligence &amp; Hunting</span>
-              <span class="font-mono text-[10px] text-red-400">5 IPs Externas</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">2. Análisis de IoCs Externos</span>
+              <span class="font-mono text-[10px] text-red-400">5 IPs Detectadas</span>
             </div>
-            <p class="text-[11px] text-slate-300 mt-1">Correlación de IoCs externos (<code class="font-mono text-red-300">203.0.113.74</code>, <code class="font-mono text-red-300">198.51.100.77</code>, <code class="font-mono text-red-300">192.0.2.91</code>, <code class="font-mono text-red-300">198.51.100.88</code>, <code class="font-mono text-red-300">203.0.113.88</code>).</p>
+            <p class="text-[11px] text-slate-300 mt-1">Detección de conexiones no autorizadas e intentos de intrusión desde direcciones IP públicas identificadas en los registros.</p>
           </div>
           <div class="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">3. MITRE ATT&amp;CK Module</span>
-              <span class="font-mono text-[10px] text-cyan-300">9 Tácticas · 13 TTPs</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">3. Matriz MITRE ATT&amp;CK</span>
+              <span class="font-mono text-[10px] text-cyan-300">9 Tácticas · 13 Técnicas</span>
             </div>
-            <p class="text-[11px] text-slate-300 mt-1">Mapeo automático de los 123 eventos maliciosos/anómalos sobre la matriz de tácticas y técnicas de adversarios.</p>
+            <p class="text-[11px] text-slate-300 mt-1">Clasificación técnica estandarizada de técnicas de ataque documentadas en los 123 eventos de riesgo.</p>
           </div>
           <div class="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">4. Security Operations &amp; PDF</span>
-              <span class="font-mono text-[10px] text-emerald-300">Active Response</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">4. Reportes &amp; Entregables</span>
+              <span class="font-mono text-[10px] text-emerald-300">PDF + JSON</span>
             </div>
-            <p class="text-[11px] text-slate-300 mt-1">Playbooks de contención DFIR por incidente y generación de reporte dual (Ejecutivo + Técnico) en PDF único.</p>
+            <p class="text-[11px] text-slate-300 mt-1">Generación de informe consolidado (Ejecutivo + Técnico) y exportación de evidencias estructuradas con hash SHA-256.</p>
           </div>
         </div>
       </div>
@@ -420,7 +420,7 @@
               <span class="text-xs text-slate-400 font-mono">Ventana: 2026-10-23 07:46:07 — 13:44:06 (UTC-5)</span>
             </div>
             <h2 class="text-base font-bold text-white mt-1">Se detectaron 6 incidentes de seguridad multi-etapa (123 eventos maliciosos/anómalos sobre 715 registros)</h2>
-            <p class="text-xs text-slate-300 mt-0.5">El enjambre de agentes IA identificó ataques de Password Spraying, intrusión RDP con exfiltración, eliminación de copias sombra (VSS), exfiltración masiva HTTPS (241.57 MB), persistencia de sistema y Webshell RCE.</p>
+            <p class="text-xs text-slate-300 mt-0.5">El motor analítico identificó 6 incidentes de seguridad que abarcan Password Spraying, intrusión RDP con exfiltración, eliminación de copias sombra (VSS), exfiltración masiva HTTPS (241.57 MB), persistencia y Webshell RCE.</p>
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
@@ -639,35 +639,35 @@
 
     <!-- ================= TAB 2: AI AGENTS & INCIDENTS ================= -->
     <section id="tab-ai-agents" class="tab-panel hidden space-y-6">
-      <!-- AI Architecture Explanation Header -->
+      <!-- Pipeline de Análisis y Correlación Forense -->
       <div class="bg-gradient-to-r from-indigo-950/70 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-2xl p-5">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">Arquitectura Multi-Agente SOC L2</span>
-            <h2 class="text-lg font-bold text-white mt-1.5">Motor de Inteligencia Artificial para Clasificación de Riesgo y Explicación Forense</h2>
+            <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">Pipeline Analítico SOC L2</span>
+            <h2 class="text-lg font-bold text-white mt-1.5">Motor de Correlación Heurística, Scoring Estadístico y Análisis Forense</h2>
             <p class="text-xs text-slate-300 mt-1 max-w-4xl">
-              Los registros crudos del SIEM a menudo subestiman ataques complejos (por ejemplo, marcando inicios de sesión exitosos tras fuerza bruta o compresión de archivos confidenciales con <code class="text-indigo-300 font-mono">7z.exe</code> como <em>Informational</em>, o borrado de copias sombra con <code class="text-indigo-300 font-mono">vssadmin.exe</code> como <em>Warning</em>). Nuestro pipeline de <strong>4 Agentes de IA</strong> correlaciona secuencias de eventos, asigna el nivel de riesgo real (<strong>Alto, Medio, Bajo</strong>) y redacta la explicación técnica y ejecutiva.
+              Los registros individuales del SIEM a menudo enmascaran incidentes avanzados (marcando inicios de sesión exitosos posteriores a fuerza bruta o empaquetado de archivos con <code class="text-indigo-300 font-mono">7z.exe</code> como <em>Informational</em>, o eliminación de copias sombra con <code class="text-indigo-300 font-mono">vssadmin.exe</code> como <em>Warning</em>). El pipeline forense procesa el dataset en <strong>4 fases analíticas</strong> para correlacionar secuencias temporales, calcular el nivel de riesgo real (<strong>Alto, Medio, Bajo</strong>) y generar el dictamen técnico.
             </p>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0">
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-center">
-              <span class="text-[10px] font-mono text-indigo-400 block">AGENTE 01</span>
+              <span class="text-[10px] font-mono text-indigo-400 block">FASE 01</span>
               <span class="text-xs font-bold text-white block mt-0.5">Ingesta & Normalización</span>
               <span class="text-[10px] text-emerald-400">✓ Activo</span>
             </div>
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-center">
-              <span class="text-[10px] font-mono text-indigo-400 block">AGENTE 02</span>
-              <span class="text-xs font-bold text-white block mt-0.5">Correlación MITRE</span>
+              <span class="text-[10px] font-mono text-indigo-400 block">FASE 02</span>
+              <span class="text-xs font-bold text-white block mt-0.5">Mapeo MITRE ATT&CK</span>
               <span class="text-[10px] text-emerald-400">✓ Activo</span>
             </div>
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-center">
-              <span class="text-[10px] font-mono text-indigo-400 block">AGENTE 03</span>
-              <span class="text-xs font-bold text-white block mt-0.5">Scoring de Riesgo</span>
+              <span class="text-[10px] font-mono text-indigo-400 block">FASE 03</span>
+              <span class="text-xs font-bold text-white block mt-0.5">Scoring Estadístico</span>
               <span class="text-[10px] text-emerald-400">✓ Activo</span>
             </div>
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-center">
-              <span class="text-[10px] font-mono text-indigo-400 block">AGENTE 04</span>
-              <span class="text-xs font-bold text-white block mt-0.5">Redactor Forense</span>
+              <span class="text-[10px] font-mono text-indigo-400 block">FASE 04</span>
+              <span class="text-xs font-bold text-white block mt-0.5">Dictamen Forense</span>
               <span class="text-[10px] text-emerald-400">✓ Activo</span>
             </div>
           </div>
@@ -818,9 +818,9 @@
         <!-- Left Sidebar: Wazuh Index Pattern Fields & Top Values (Click to Filter) -->
         <aside class="lg:col-span-3 wazuh-module-card rounded-2xl p-4 space-y-4">
           <div class="border-b border-slate-800 pb-2.5">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-blue-400 block">Index Pattern Fields</span>
-            <h3 class="text-xs font-bold text-white mt-0.5">Campos Disponibles (12 Columnas Excel + 4 Campos IA)</h3>
-            <p class="text-[11px] text-slate-400 mt-0.5">Haz clic en cualquier valor para filtrar eventos al estilo Wazuh Discover.</p>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-blue-400 block">Campos y Filtros SIEM</span>
+            <h3 class="text-xs font-bold text-white mt-0.5">Campos Normalizados (12 Columnas SIEM + 4 Campos Forenses)</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Haz clic en cualquier valor para aplicar filtros instantáneos sobre los eventos.</p>
           </div>
 
           <div id="wazuh-facets-container" class="space-y-4 text-xs">
@@ -834,7 +834,7 @@
           <div id="wazuh-doc-inspector" class="hidden bg-slate-950 border border-blue-500/50 rounded-2xl p-4 shadow-2xl space-y-3">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-600 text-white rounded">Wazuh Event Inspector</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-600 text-white rounded">Inspector de Evento Forense</span>
                 <span id="inspector-doc-id" class="font-mono text-xs font-bold text-white">EVT-00001</span>
                 <span id="inspector-doc-ts" class="font-mono text-xs text-slate-400"></span>
               </div>
@@ -2285,36 +2285,35 @@
         </div>
       `).join('');
 
-      const wazuhJson = {
-        "_index": "wazuh-alerts-4.x-2026.10.23",
-        "_id": log.id,
-        "@timestamp": log.ts,
-        "agent": { "name": log.host },
-        "rule": {
-          "level": wazuhLvl,
-          "ai_risk": log.aiRisk,
-          "anomaly_score": log.anomalyScore,
-          "physical_row": log.physicalRow,
+      const eventJson = {
+        "schema": "SentinelAI-SOC-L2-NormalizedEvent",
+        "log_id": log.id,
+        "physical_row": log.physicalRow || 'S1-R?',
+        "timestamp": log.ts,
+        "hostname": log.host,
+        "forensic_classification": {
+          "risk_level": log.aiRisk,
+          "anomaly_score": log.anomalyScore || 0,
           "incident_id": log.incidentId,
-          "mitre": { "id": log.mitre },
-          "description": log.aiReason
+          "mitre_technique": log.mitre,
+          "technical_reasoning": log.aiReason
         },
-        "data": {
+        "siem_event_data": {
           "Log_ID": log.id,
           "Timestamp": log.ts,
           "Hostname": log.host,
           "Event_ID": log.ev,
           "User": log.user,
           "Source_IP": log.src,
-          "Destination": log.dst,
+          "Destination": log.dst || '',
           "Log_Source": log.lsrc,
           "Event_Description": log.desc,
-          "Process_CommandLine": log.cmd,
+          "Process_CommandLine": log.cmd || '',
           "Result": log.res,
-          "Severity": log.sev
+          "Original_Severity": log.sev
         }
       };
-      document.getElementById('inspector-json-view').textContent = JSON.stringify(wazuhJson, null, 2);
+      document.getElementById('inspector-json-view').textContent = JSON.stringify(eventJson, null, 2);
     }
 
     function escapeHtml(str) {
@@ -2541,10 +2540,10 @@
 
       banner.classList.remove('hidden');
       const steps = [
-        { pct: 25, msg: 'Agente 01: Normalizando registros Excel y validando esquemas SIEM...' },
-        { pct: 55, msg: 'Agente 02: Correlacionando secuencias de ataque y tácticas MITRE ATT&CK...' },
-        { pct: 85, msg: 'Agente 03: Clasificando hallazgos en Riesgo Bajo, Medio y Alto...' },
-        { pct: 100, msg: 'Agente 04: Redactando Resumen Ejecutivo y Resumen Técnico Forense...' }
+        { pct: 25, msg: 'Fase 01: Normalizando registros y calculando hash criptográfico SHA-256...' },
+        { pct: 55, msg: 'Fase 02: Mapeando secuencias de eventos sobre técnicas MITRE ATT&CK...' },
+        { pct: 85, msg: 'Fase 03: Ejecutando motor estadístico multivariable de anomalías...' },
+        { pct: 100, msg: 'Fase 04: Generando dictamen técnico, matrices e informe consolidado...' }
       ];
 
       let i = 0;
@@ -2622,7 +2621,7 @@
             lowRisk: processedLogs.filter(l => l.aiRisk === 'Bajo').length
           },
           analystSignature: "SOC L2 Automated Certification Engine",
-          frameworkCompliance: ["NIST SP 800-61 Rev 2", "MITRE ATT&CK v14", "Wazuh XDR Standard"]
+          frameworkCompliance: ["NIST SP 800-61 Rev 2", "MITRE ATT&CK v14", "Cadena de Custodia Forense"]
         },
         incidentCatalog: incidentSummaries,
         evidenceRecords: processedLogs.map(l => ({
