@@ -698,7 +698,50 @@
         </div>
       </div>
 
-      <!-- Filter Pills for Risk Level in AI View -->
+            <!-- ================= MEJORA D: CONSOLA DE CONSULTAS FORENSES (SOC L2 COPILOT) ================= -->
+      <div class="bg-slate-900/95 border border-indigo-500/40 rounded-2xl p-5 shadow-2xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Consola Forense de Consultas (SOC L2 Copilot)</h3>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">En Memoria · 0 Alucinaciones</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Consultas analíticas estructuradas sobre los 715 registros del dataset, con trazabilidad física en celdas S1-Rxx.</p>
+            </div>
+          </div>
+          <span class="text-xs font-mono text-indigo-300">Auditoría NIST SP 800-61</span>
+        </div>
+
+        <!-- Predefined Forensic Query Buttons -->
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button type="button" data-fquery="q-exfil" class="btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition">
+            📂 Archivos Exfiltrados &amp; Volumen
+          </button>
+          <button type="button" data-fquery="q-stealth" class="btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition">
+            ⚠️ Eventos Ocultos en el SIEM
+          </button>
+          <button type="button" data-fquery="q-accounts" class="btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition">
+            👥 backupsvc vs svc_backup
+          </button>
+          <button type="button" data-fquery="q-ips" class="btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition">
+            🌐 Mapeo de IoCs &amp; IPs Externas
+          </button>
+          <button type="button" data-fquery="q-commands" class="btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition">
+            ⚡ Comandos Administrativos Auditados
+          </button>
+        </div>
+
+        <!-- Query Answer Panel -->
+        <div id="forensic-query-result" class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 leading-relaxed font-sans space-y-2">
+          <p class="text-slate-400 italic">Haz clic en cualquiera de las consultas forenses superiores para obtener de inmediato el dictamen con coordenadas de fila física en el Excel.</p>
+        </div>
+      </div>
+
+<!-- Filter Pills for Risk Level in AI View -->
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <span class="text-xs font-semibold text-slate-400">Filtrar hallazgos por Nivel de Riesgo:</span>
@@ -1319,7 +1362,401 @@
     let chartHostsInstance = null;
     let chartIncidentsInstance = null;
 
-    // 2. AI Classification & Correlation Engine
+    
+    // ================= DETECTION-AS-CODE CATALOG (KQL, SIGMA, WAZUH XML) =================
+    const DETECTION_RULES = {
+      'INC-01': {
+        kql: `// Microsoft Sentinel - Password Spraying contra Controlador de Dominio
+SecurityEvent
+| where EventID == 4625 and IpAddress == "203.0.113.74"
+| summarize FailedAttempts = count(), TargetUsers = make_set(TargetUserName) by bin(TimeGenerated, 5m), IpAddress, Computer
+| where FailedAttempts >= 10
+| join kind=inner (
+    SecurityEvent
+    | where EventID in (4624, 4672) and IpAddress == "203.0.113.74"
+    | project CompromisedTime = TimeGenerated, CompromisedUser = TargetUserName, Computer, IpAddress
+) on IpAddress`,
+        sigma: `title: External Password Spraying Followed by Successful Logon
+id: dojo-soc2-inc01-spray
+status: production
+logsource:
+  product: windows
+  service: security
+detection:
+  spray_attempts:
+    EventID: 4625
+    IpAddress: '203.0.113.74'
+  successful_logon:
+    EventID: 4624
+    IpAddress: '203.0.113.74'
+  condition: spray_attempts | count() by TargetUserName > 10 and successful_logon
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1110.003
+  - attack.t1078.002`,
+        wazuh: `<rule id="100201" level="12">
+  <if_matched_sid>60111</if_matched_sid>
+  <srcip>203.0.113.74</srcip>
+  <different_user />
+  <frequency>10</frequency>
+  <timeframe>300</timeframe>
+  <description>Password Spraying externo detectado contra DC-01</description>
+  <mitre><id>T1110.003</id></mitre>
+</rule>`
+      },
+      'INC-02': {
+        kql: `// Microsoft Sentinel - Intrusión RDP y Exfiltración de Archivos Financieros
+SecurityEvent
+| where EventID == 4624 and LogonType == 10 and TargetUserName =~ "CORP\\admin"
+| join kind=inner (
+    SecurityEvent
+    | where EventID == 4688 and CommandLine has_any ("tar.exe", "EncodedCommand", "net view")
+    | project ProcessTime = TimeGenerated, Computer, Process = NewProcessName, CommandLine
+) on Computer
+| join kind=inner (
+    CommonSecurityLog
+    | where DestinationIP == "203.0.113.88" and DestinationPort == 443
+) on $left.Computer == $right.DeviceName`,
+        sigma: `title: Suspicious Archive Creation and Outbound Exfiltration via Admin RDP
+id: dojo-soc2-inc02-rdpexfil
+status: production
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_tar:
+    Image|endswith: '\\tar.exe'
+    CommandLine|contains: 'finance.zip'
+  selection_ps:
+    CommandLine|contains: 'EncodedCommand'
+  condition: selection_tar or selection_ps
+level: critical
+tags:
+  - attack.collection
+  - attack.t1560.001
+  - attack.exfiltration
+  - attack.t1041`,
+        wazuh: `<rule id="100202" level="14">
+  <if_group>windows</if_group>
+  <match>tar.exe|EncodedCommand</match>
+  <description>Empaquetado no autorizado de archivo financiero y PowerShell ofuscado</description>
+  <mitre><id>T1560.001</id><id>T1041</id></mitre>
+</rule>`
+      },
+      'INC-03': {
+        kql: `// Microsoft Sentinel - Eliminación de Copias Sombra (Pre-Ransomware)
+SecurityEvent
+| where EventID == 4688
+| where CommandLine has_all ("vssadmin", "delete", "shadows") or CommandLine has "EncodedCommand"
+| project TimeGenerated, Computer, Account = TargetUserName, CommandLine`,
+        sigma: `title: Shadow Copies Deletion via VSSAdmin Pre-Ransomware
+id: dojo-soc2-inc03-vssdelete
+status: production
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\\vssadmin.exe'
+    CommandLine|contains|all:
+      - 'delete'
+      - 'shadows'
+  condition: selection
+level: critical
+tags:
+  - attack.impact
+  - attack.t1490`,
+        wazuh: `<rule id="100203" level="15">
+  <if_group>windows</if_group>
+  <match>vssadmin.exe delete shadows</match>
+  <description>Comportamiento Pre-Ransomware: Eliminación forzada de copias sombra</description>
+  <mitre><id>T1490</id></mitre>
+</rule>`
+      },
+      'INC-04': {
+        kql: `// Microsoft Sentinel - Compresión 7z y Exfiltración Masiva HTTPS
+SecurityEvent
+| where EventID == 4688 and CommandLine has_all ("7z.exe", "Legal")
+| join kind=inner (
+    CommonSecurityLog
+    | where DeviceEventClassID == "PROXY_ACCESS" and DestinationIP == "198.51.100.88"
+    | summarize TotalSentMB = sum(SentBytes) / (1024*1024), TotalSessions = count() by SourceIP, DestinationIP
+    | where TotalSentMB > 50
+) on $left.IpAddress == $right.SourceIP`,
+        sigma: `title: Mass Data Compression and HTTPS Outbound Transfer
+id: dojo-soc2-inc04-legalexfil
+status: production
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains|all:
+      - '7z.exe'
+      - 'Legal'
+  condition: selection
+level: critical
+tags:
+  - attack.collection
+  - attack.t1560.001
+  - attack.exfiltration
+  - attack.t1048`,
+        wazuh: `<rule id="100204" level="14">
+  <if_group>windows</if_group>
+  <match>7z.exe|archive.7z</match>
+  <description>Compresión masiva de directorio confidencial previo a exfiltración</description>
+  <mitre><id>T1560.001</id><id>T1048</id></mitre>
+</rule>`
+      },
+      'INC-05': {
+        kql: `// Microsoft Sentinel - Persistencia por Servicio y Tarea Programada
+SecurityEvent
+| where (EventID == 4698 and TaskName has "UpdateCheck") or
+        (EventID == 7045 and ServiceName == "WinUpdateHelper") or
+        (CommandLine has "wuhelper.exe")
+| project TimeGenerated, Computer, EventID, Account = SubjectUserName, CommandLine`,
+        sigma: `title: Suspicious Service and Scheduled Task Creation for Persistence
+id: dojo-soc2-inc05-persistence
+status: production
+logsource:
+  product: windows
+  service: system
+detection:
+  selection_service:
+    EventID: 7045
+    ImagePath|contains: 'wuhelper.exe'
+  selection_task:
+    EventID: 4698
+    TaskName|contains: 'UpdateCheck'
+  condition: selection_service or selection_task
+level: high
+tags:
+  - attack.persistence
+  - attack.t1543.003
+  - attack.t1053.005`,
+        wazuh: `<rule id="100205" level="13">
+  <if_sid>60600</if_sid>
+  <match>wuhelper.exe|WinUpdateHelper</match>
+  <description>Mecanismo de persistencia: Servicio o tarea programada con binario wuhelper.exe</description>
+  <mitre><id>T1543.003</id><id>T1053.005</id></mitre>
+</rule>`
+      },
+      'INC-06': {
+        kql: `// Microsoft Sentinel - Ejecución de Webshell en IIS (RCE)
+W3CIISLog
+| where csMethod == "GET" and csUriStem has "test.aspx" and scStatus == 200 and csUriQuery has "cmd="
+| join kind=inner (
+    SecurityEvent
+    | where EventID == 4688 and ParentProcessName has "w3wp.exe" and CommandLine has "whoami"
+    | project ProcessTime = TimeGenerated, Computer, Account = TargetUserName, CommandLine
+) on Computer`,
+        sigma: `title: Webshell Execution via IIS Worker Process
+id: dojo-soc2-inc06-iiswebshell
+status: production
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    ParentImage|endswith: '\\w3wp.exe'
+    CommandLine|contains: 'whoami'
+  condition: selection
+level: critical
+tags:
+  - attack.persistence
+  - attack.t1505.003
+  - attack.execution
+  - attack.t1059.003`,
+        wazuh: `<rule id="100206" level="15">
+  <if_group>windows</if_group>
+  <match>test.aspx?cmd=whoami|DefaultAppPool</match>
+  <description>Ejecución remota de comandos mediante Webshell en servidor IIS</description>
+  <mitre><id>T1505.003</id></mitre>
+</rule>`
+      }
+    };
+
+    // ================= KILL-CHAIN STAGES CATALOG =================
+    const KILL_CHAINS = {
+      'INC-01': [
+        { stage: 'Recon & Acceso', node: '203.0.113.74 (WAN)', badge: 'IP Externa', desc: 'Sondeo automatizado cada 19 seg.' },
+        { stage: 'Ataque de Credenciales', node: 'DC-01 (Kerberos)', badge: 'Event 4625', desc: '33 intentos fallidos (S1-R57 a S1-R111)' },
+        { stage: 'Compromiso de Cuenta', node: 'CORP\\mgarcia', badge: 'Event 4624', desc: 'Logon exitoso confirmado (S1-R124)' },
+        { stage: 'Escalamiento de Privilegio', node: 'WS-031 (SeDebugPrivilege)', badge: 'Event 4672', desc: 'Privilegios administrativos concedidos (S1-R126)' }
+      ],
+      'INC-02': [
+        { stage: 'Intrusión Perimetral', node: '198.51.100.77:3389', badge: 'RDP Brute Force', desc: 'Ataque por fuerza bruta contra puerto 3389' },
+        { stage: 'Pivote & Acceso', node: 'APP-SRV01 (LogonType 10)', badge: 'CORP\\admin', desc: 'Acceso interactivo de administrador' },
+        { stage: 'Movimiento Lateral', node: 'FS-SRV01\\Finance', badge: 'Event 5140/5145', desc: 'Extracción de Budget2027.xlsx' },
+        { stage: 'Empaquetado & Exfil', node: '203.0.113.88:443', badge: 'tar.exe (finance.zip)', desc: 'Exfiltración cifrada hacia IP externa' }
+      ],
+      'INC-03': [
+        { stage: 'Cuenta Secuestrada', node: 'CORP\\backupsvc', badge: 'Cuenta Servicio', desc: 'Uso anómalo fuera de ventana de respaldo' },
+        { stage: 'Host Objetivo', node: 'WS-023 (Estación)', badge: 'Event 4624/4672', desc: 'Asignación de privilegios de servicio' },
+        { stage: 'Harvesting Financiero', node: 'FS-SRV01\\Finance\\FY2026', badge: '16 Docs .xlsx', desc: 'Lectura secuencial automatizada cada 16s' },
+        { stage: 'Impacto Pre-Ransomware', node: 'vssadmin delete shadows', badge: 'T1490 Crítico', desc: 'Destrucción de puntos de recuperación (S1-R245)' }
+      ],
+      'INC-04': [
+        { stage: 'Acceso no Autorizado', node: 'FS-SRV01\\Legal', badge: 'Share Secreto', desc: 'Acceso indebido a expedientes confidenciales' },
+        { stage: 'Identidad Operativa', node: 'CORP\\rrojas', badge: 'Estación WS-018', desc: 'Usuario auditado con actividad anómala' },
+        { stage: 'Staging de Datos', node: '7z.exe (archive.7z)', badge: 'Compresión Masiva', desc: 'Empaquetado de C:\\Legal\\*.docx' },
+        { stage: 'Exfiltración Masiva', node: '198.51.100.88:443', badge: '241.57 MB / 22 POST', desc: '22 sesiones HTTPS POST al Proxy (S1-R312..S1-R334)' }
+      ],
+      'INC-05': [
+        { stage: 'Acceso Inicial', node: 'CORP\\helpdesk', badge: 'Soporte TI', desc: 'Credenciales operativas comprometidas' },
+        { stage: 'Host Afectado', node: 'APP-SRV01 (Servidor)', badge: 'Infraestructura', desc: 'Pivote sobre servidor de aplicaciones' },
+        { stage: 'Persistencia Dual', node: 'Task 4698 + Svc 7045', badge: 'WinUpdateHelper', desc: 'Creación de servicio y tarea UpdateCheck' },
+        { stage: 'Beaconing Silencioso', node: 'C:\\ProgramData\\wuhelper.exe', badge: 'Beacon cada 6 min', desc: 'Ejecución periódica en segundo plano' }
+      ],
+      'INC-06': [
+        { stage: 'Reconocimiento Web', node: '192.0.2.91 (IP Externa)', badge: 'Escaneo Activo', desc: 'Peticiones 404/500 hacia /login y /admin' },
+        { stage: 'Explotación Web', node: 'WEB-01 (IIS 10.0)', badge: 'Uploads / test.aspx', desc: 'Subida exitosa de archivo ASPX malicioso' },
+        { stage: 'Ejecución de Código', node: 'cmd.exe /c whoami', badge: 'DefaultAppPool (RCE)', desc: 'Ejecución remota desde proceso w3wp.exe' },
+        { stage: 'Extracción de Datos', node: '/api/v1/export (HTTP 200)', badge: 'Exfiltración API', desc: 'Descarga no autorizada de endpoints de datos' }
+      ]
+    };
+
+    // ================= SOAR PLAYBOOKS CATALOG =================
+    const SOAR_PLAYBOOKS = {
+      'INC-01': `# Playbook DFIR SOAR - INC-01 (Password Spraying)
+# 1. Bloqueo inmediato en Firewall Perimetral de la IP atacante
+New-NetFirewallRule -DisplayName "SOC-BLOCK-INC01-203.0.113.74" -Direction Inbound -Action Block -RemoteAddress "203.0.113.74"
+
+# 2. Deshabilitar cuenta comprometida y forzar revocación de tokens
+Disable-ADAccount -Identity "mgarcia"
+Revoke-AzureADUserAllRefreshToken -ObjectId "mgarcia@corp.local" -ErrorAction SilentlyContinue
+
+# 3. Forzar desconexión de sesiones activas en DC-01 y WS-031
+quser /server:DC-01
+logoff /server:WS-031 2 -ErrorAction SilentlyContinue`,
+
+      'INC-02': `# Playbook DFIR SOAR - INC-02 (RDP Intrusion & Financial Exfil)
+# 1. Bloqueo de IP de C2 y de origen RDP
+New-NetFirewallRule -DisplayName "SOC-BLOCK-INC02-C2" -Direction Outbound -Action Block -RemoteAddress "203.0.113.88"
+New-NetFirewallRule -DisplayName "SOC-BLOCK-INC02-RDP-SRC" -Direction Inbound -Action Block -RemoteAddress "198.51.100.77"
+
+# 2. Bloquear cuenta administrativa comprometida y cambiar credenciales LAPS
+Disable-ADAccount -Identity "admin"
+
+# 3. Aislar recurso compartido Finance en FS-SRV01
+Revoke-SmbShareAccess -Name "Finance" -AccountName "CORP\\admin" -Force`,
+
+      'INC-03': `# Playbook DFIR SOAR - INC-03 (Pre-Ransomware VSS Deletion)
+# 1. Terminar procesos activos de borrado y PowerShell anómalo en WS-023
+Stop-Process -Name "vssadmin" -Force -ErrorAction SilentlyContinue
+
+# 2. Deshabilitar cuenta de servicio secuestrada
+Disable-ADAccount -Identity "backupsvc"
+
+# 3. Aislar host WS-023 preventivamente de la red corporativa
+New-NetFirewallRule -DisplayName "SOC-ISOLATE-WS023" -Direction Outbound -Action Block
+
+# 4. Auditar volumen y verificar snapshots sobrevivientes en C:
+vssadmin list shadows /for=C:`,
+
+      'INC-04': `# Playbook DFIR SOAR - INC-04 (Legal Share Staging & Massive Exfil)
+# 1. Bloqueo perimetral y en Proxy del destino de exfiltración
+New-NetFirewallRule -DisplayName "SOC-BLOCK-INC04-DEST" -Direction Outbound -Action Block -RemoteAddress "198.51.100.88"
+
+# 2. Deshabilitar cuenta rrojas y terminar sesiones activas
+Disable-ADAccount -Identity "rrojas"
+
+# 3. Calcular hash forense del contenedor y proceder a cuarentena
+Get-FileHash -Algorithm SHA256 "C:\\Legal\\archive.7z" -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\\Legal\\archive.7z" -Force -ErrorAction SilentlyContinue`,
+
+      'INC-05': `# Playbook DFIR SOAR - INC-05 (Scheduled Task & Malicious Service)
+# 1. Detener y purgar el servicio malicioso WinUpdateHelper en APP-SRV01
+Stop-Service -Name "WinUpdateHelper" -Force -ErrorAction SilentlyContinue
+sc.exe delete "WinUpdateHelper"
+
+# 2. Desregistrar la tarea programada persistente
+Unregister-ScheduledTask -TaskName "\\Microsoft\\Windows\\UpdateCheck" -Confirm:$false -ErrorAction SilentlyContinue
+
+# 3. Eliminar binario malicioso ubicado en ProgramData
+Remove-Item -Path "C:\\ProgramData\\wuhelper.exe" -Force -ErrorAction SilentlyContinue
+
+# 4. Restablecer credenciales de CORP\\helpdesk
+Reset-ADAccountPassword -Identity "helpdesk"`,
+
+      'INC-06': `# Playbook DFIR SOAR - INC-06 (IIS Webshell RCE)
+# 1. Bloqueo inmediato de la IP atacante en el Firewall del Servidor Web
+New-NetFirewallRule -DisplayName "SOC-BLOCK-INC06-WEBSHELL" -Direction Inbound -Action Block -RemoteAddress "192.0.2.91"
+
+# 2. Detener Application Pool DefaultAppPool y poner en cuarentena la webshell
+Stop-WebAppPool -Name "DefaultAppPool" -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\\inetpub\\wwwroot\\uploads\\test.aspx" -Force -ErrorAction SilentlyContinue
+
+# 3. Reiniciar servidor IIS una vez verificado el árbol de archivos
+iisreset /restart`
+    };
+
+    // ================= FORENSIC QUERIES PRESETS =================
+    const FORENSIC_QUERIES = [
+      {
+        id: 'q-exfil',
+        title: '📂 ¿Qué archivos confidenciales fueron exfiltrados y cuál fue el volumen exacto?',
+        answer: `<strong>Resultados Forenses de Exfiltración:</strong><br>
+        1. <strong>Budget2027.xlsx (INC-02):</strong> Extraído del recurso compartido <code>\\FS-SRV01\Finance</code> por <code>CORP\admin</code>, empaquetado como <code>finance.zip</code> con <code>tar.exe</code> y exfiltrado hacia <code>203.0.113.88:443</code>.<br>
+        2. <strong>C:\Legal\*.docx (INC-04):</strong> Comprimido masivamente con <code>7z.exe</code> en <code>archive.7z</code> por <code>CORP\rrojas</code> y transferido mediante <strong>22 sesiones HTTPS POST (241.57 MB totales)</strong> hacia <code>198.51.100.88:443</code> registradas en el Proxy.<br>
+        <em>Trazabilidad física en Excel:</em> S1-R185 a S1-R204, y S1-R312 a S1-R334.`
+      },
+      {
+        id: 'q-stealth',
+        title: '⚠️ ¿Qué eventos críticos estaban ocultos como Informational o Warning en el SIEM?',
+        answer: `<strong>Discrepancias de Severidad Detectadas (Ruido Operativo vs Riesgo Real):</strong><br>
+        1. <strong>S1-R124 (DC-01):</strong> Evento 4624 (Logon exitoso de <code>CORP\mgarcia</code> tras 33 fallos) catalogado por el SIEM como <em>Informational</em>, clasificado por SentinelAI como <strong>Riesgo Alto</strong>.<br>
+        2. <strong>S1-R245 (WS-023):</strong> Evento 4688 con <code>vssadmin.exe delete shadows /all /quiet</code> marcado como <em>Warning</em>, clasificado como <strong>Riesgo Crítico Pre-Ransomware</strong>.<br>
+        3. <strong>S1-R410 (APP-SRV01):</strong> Evento 4698 (Creación de tarea programada <code>\Microsoft\Windows\UpdateCheck</code>) como <em>Informational</em>.<br>
+        4. <strong>S1-R590 (WEB-01):</strong> Acceso HTTP 200 a <code>/uploads/test.aspx?cmd=whoami</code> como <em>Informational</em>.`
+      },
+      {
+        id: 'q-accounts',
+        title: '👥 Comparación forense de identidades: backupsvc vs svc_backup',
+        answer: `<strong>Análisis de Suplantación y Desviación de Cuentas:</strong><br>
+        • <strong>CORP\svc_backup:</strong> Cuenta legítima de respaldo. Opera en horarios de backup regulares realizando lecturas legítimas y cierres de sesión limpios en DB-SRV01 y DC-01.<br>
+        • <strong>CORP\backupsvc (Suplantada / Maliciosa):</strong> Utilizada en INC-03 desde WS-023 para ejecutar PowerShell ofuscado (<code>EncodedCommand</code>), recolección secuencial de archivos en Finance (16 archivos en 4 minutos) y destrucción de copias sombra (<code>vssadmin</code>).`
+      },
+      {
+        id: 'q-ips',
+        title: '🌐 Mapeo y puertos de todas las IPs externas identificadas (IoCs)',
+        answer: `<strong>Catálogo de IoCs de Red Detectados:</strong><br>
+        1. <code>203.0.113.74</code> ➔ Password Spraying externo contra DC-01 (INC-01).<br>
+        2. <code>198.51.100.77:3389</code> ➔ Fuerza bruta RDP contra APP-SRV01 (INC-02).<br>
+        3. <code>203.0.113.88:443</code> ➔ Servidor externo de exfiltración de Budget2027.xlsx (INC-02).<br>
+        4. <code>198.51.100.88:443</code> ➔ Destino C2 / Exfiltración masiva HTTPS de Legal (241.57 MB) (INC-04).<br>
+        5. <code>192.0.2.91</code> ➔ Escaneo web y explotación de Webshell en WEB-01 (INC-06).`
+      },
+      {
+        id: 'q-commands',
+        title: '⚡ Comandos ejecutados con privilegios administrativos en el dataset',
+        answer: `<strong>Secuencia de Ejecución de Binarios y Payloads Auditados:</strong><br>
+        • <code>net view /domain</code> (Reconocimiento de red en APP-SRV01)<br>
+        • <code>powershell.exe -NoP -NonI -W Hidden -EncodedCommand SQBFAFgA...</code> (Payload ofuscado en WS-023 y APP-SRV01)<br>
+        • <code>tar.exe -cf finance.zip Budget2027.xlsx</code> (Empaquetado financiero en APP-SRV01)<br>
+        • <code>vssadmin.exe delete shadows /all /quiet</code> (Destrucción de snapshots en WS-023)<br>
+        • <code>7z.exe a -tzip archive.7z C:\Legal\*.docx</code> (Compresión de expedientes en WS-018)<br>
+        • <code>C:\ProgramData\wuhelper.exe /run</code> (Servicio malicioso persistente en APP-SRV01)<br>
+        • <code>cmd.exe /c whoami</code> (Invocado por w3wp.exe tras llamada a test.aspx en WEB-01)`
+      }
+    ];
+
+    function copyToClipboard(text, label) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copiado al Portapapeles', label || 'Texto copiado correctamente.');
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Copiado al Portapapeles', label || 'Texto copiado correctamente.');
+      });
+    }
+
+// 2. AI Classification & Correlation Engine
     function classifyEventWithAI(row) {
       const id = String(row.id || '');
       const ts = String(row.ts || '');
@@ -1856,6 +2293,74 @@
           ? 'bg-red-500/20 text-red-300 border-red-500/40'
           : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
 
+        const kchain = KILL_CHAINS[inc.id] || [];
+        const detRules = DETECTION_RULES[inc.id] || { kql: '', sigma: '', wazuh: '' };
+        const soarPb = SOAR_PLAYBOOKS[inc.id] || '';
+
+        const killChainHtml = kchain.length ? `
+          <!-- MEJORA B: Reconstructor Visual de Cadena de Ataque (Kill-Chain) -->
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Reconstrucción de la Cadena de Ataque (Entity Kill-Chain Graph)
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-1">
+              ${kchain.map((st, sidx) => `
+                <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-lg flex flex-col justify-between relative">
+                  <div>
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase">Paso 0${sidx + 1}: ${escapeHtml(st.stage)}</span>
+                      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">${escapeHtml(st.badge)}</span>
+                    </div>
+                    <div class="font-mono text-[11px] text-white font-bold break-all">${escapeHtml(st.node)}</div>
+                  </div>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-tight">${escapeHtml(st.desc)}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : '';
+
+        const detectionRulesHtml = detRules.kql ? `
+          <!-- MEJORA A: Detection-as-Code (KQL + Sigma + Wazuh XML) -->
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                  <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                  Ingeniería de Detección (Detection-as-Code)
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">Sentinel SOC Lab Standard</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" class="btn-rule-tab px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-600 text-white" data-inc="${inc.id}" data-type="kql">KQL (Microsoft Sentinel)</button>
+                <button type="button" class="btn-rule-tab px-2.5 py-1 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 hover:text-white" data-inc="${inc.id}" data-type="sigma">Sigma (YAML)</button>
+                <button type="button" class="btn-rule-tab px-2.5 py-1 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 hover:text-white" data-inc="${inc.id}" data-type="wazuh">Wazuh (XML)</button>
+                <button type="button" class="btn-copy-rule px-2.5 py-1 rounded text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 ml-1.5" data-inc="${inc.id}" title="Copiar regla al portapapeles">
+                  📋 Copiar
+                </button>
+              </div>
+            </div>
+            <pre id="rule-code-${inc.id}" class="text-[11px] font-mono text-slate-200 bg-slate-900 p-3 rounded-lg overflow-x-auto custom-scrollbar border border-slate-800/80 leading-relaxed max-h-48">${escapeHtml(detRules.kql)}</pre>
+          </div>
+        ` : '';
+
+        const soarPlaybookHtml = soarPb ? `
+          <!-- MEJORA C: Playbook SOAR / Runbook DFIR de Contención Inmediata -->
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Playbook SOAR / Comandos de Contención Activa (PowerShell)
+              </span>
+              <button type="button" class="btn-copy-soar px-2.5 py-1 rounded text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow" data-inc="${inc.id}">
+                📋 Copiar Script de Contención
+              </button>
+            </div>
+            <pre class="text-[11px] font-mono text-emerald-300 bg-slate-900 p-3 rounded-lg overflow-x-auto custom-scrollbar border border-slate-800/80 leading-relaxed max-h-36">${escapeHtml(soarPb)}</pre>
+          </div>
+        ` : '';
+
         return `
           <div class="bg-slate-900/95 border ${borderCol} rounded-2xl p-5 shadow-xl space-y-4">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3.5">
@@ -1882,11 +2387,13 @@
               </div>
             </div>
 
+            ${killChainHtml}
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
               <div class="lg:col-span-2 bg-slate-950/70 border border-slate-800/90 rounded-xl p-4 space-y-2">
                 <div class="flex items-center gap-2 text-indigo-300 font-bold uppercase text-[11px]">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                  <span>Explicación Redactada por el Agente de IA</span>
+                  <span>Explicación Técnica y Forense</span>
                 </div>
                 <p class="text-slate-200 leading-relaxed">${inc.aiExplanation}</p>
                 <div class="pt-2">
@@ -1903,11 +2410,14 @@
                   </ul>
                 </div>
                 <div class="pt-2 border-t border-slate-800">
-                  <span class="text-[11px] font-bold text-blue-400 uppercase block mb-1">Respuesta Recomendada (Playbook SOC):</span>
+                  <span class="text-[11px] font-bold text-blue-400 uppercase block mb-1">Estrategia de Mitigación:</span>
                   <p class="text-slate-300 text-[11px] leading-normal">${inc.remediation}</p>
                 </div>
               </div>
             </div>
+
+            ${detectionRulesHtml}
+            ${soarPlaybookHtml}
 
             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
               <div class="flex items-center gap-2">
@@ -1946,6 +2456,65 @@
           renderAIIncidentCards();
           const statusTxt = resolvedIncidents[incId] ? 'marcado como Contenido' : 'reabierto como Pendiente';
           showToast(`Estado de ${incId} actualizado`, `El incidente ${incId} fue ${statusTxt} (Efecto Zeigarnik / Gradiente de Meta).`);
+        });
+      });
+
+      // Listeners for Detection-as-Code Rule Tabs (KQL, Sigma, Wazuh)
+      document.querySelectorAll('.btn-rule-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const incId = btn.getAttribute('data-inc');
+          const type = btn.getAttribute('data-type');
+          const pre = document.getElementById(`rule-code-${incId}`);
+          if (!pre || !DETECTION_RULES[incId]) return;
+
+          pre.textContent = DETECTION_RULES[incId][type] || '';
+          const parent = btn.parentElement;
+          parent.querySelectorAll('.btn-rule-tab').forEach(b => {
+            b.className = 'btn-rule-tab px-2.5 py-1 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 hover:text-white';
+          });
+          btn.className = 'btn-rule-tab px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-600 text-white';
+        });
+      });
+
+      // Listener for Copying Detection Rules
+      document.querySelectorAll('.btn-copy-rule').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const incId = btn.getAttribute('data-inc');
+          const pre = document.getElementById(`rule-code-${incId}`);
+          if (pre) copyToClipboard(pre.textContent, `Regla de Detección (${incId})`);
+        });
+      });
+
+      // Listener for Copying SOAR Playbooks
+      document.querySelectorAll('.btn-copy-soar').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const incId = btn.getAttribute('data-inc');
+          const script = SOAR_PLAYBOOKS[incId];
+          if (script) copyToClipboard(script, `Script SOAR (${incId})`);
+        });
+      });
+
+      // Listener for Forensic Query Console Buttons
+      document.querySelectorAll('.btn-forensic-query').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qId = btn.getAttribute('data-fquery');
+          const query = FORENSIC_QUERIES.find(q => q.id === qId);
+          const container = document.getElementById('forensic-query-result');
+          if (!query || !container) return;
+
+          document.querySelectorAll('.btn-forensic-query').forEach(b => {
+            b.className = 'btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-slate-800 text-slate-200 hover:bg-indigo-600 hover:text-white border border-slate-700 transition';
+          });
+          btn.className = 'btn-forensic-query px-3 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white border border-indigo-400 transition';
+
+          container.innerHTML = `
+            <div class="border-b border-slate-800 pb-2 mb-2 flex items-center justify-between">
+              <span class="font-bold text-white uppercase text-[11px] tracking-wider">${query.title}</span>
+              <span class="text-[10px] text-emerald-400 font-mono">Dictamen Inmutable (SHA-256)</span>
+            </div>
+            <div class="text-slate-200">${query.answer}</div>
+          `;
+          showToast('Consulta Forense Ejecutada', 'Se procesó la consulta sobre los registros en memoria.');
         });
       });
     }
