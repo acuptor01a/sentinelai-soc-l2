@@ -854,7 +854,7 @@
           <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
             <div class="px-4 py-2.5 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
               <span>💡 Haz clic en cualquier fila para abrir el <strong>Inspector de Documento (Table / JSON)</strong> al estilo Wazuh Threat Hunting.</span>
-              <span class="font-mono text-blue-400">wazuh-alerts / SIEM Export</span>
+              <span class="font-mono text-blue-400">Dataset SIEM Normalizado</span>
             </div>
             <div class="overflow-x-auto custom-scrollbar">
               <table class="w-full text-left border-collapse text-xs">
@@ -2059,7 +2059,7 @@
             </td>
             <td class="py-2.5 px-3 text-slate-400 whitespace-nowrap">${escapeHtml(l.ts)}</td>
             <td class="py-2.5 px-3 whitespace-nowrap">
-              <span class="px-2 py-0.5 rounded text-[10px] uppercase border ${riskBadge}">${escapeHtml(l.aiRisk)} (${wazuhLvl})</span>
+              <span class="px-2 py-0.5 rounded text-[10px] uppercase border ${riskBadge}">${escapeHtml(l.aiRisk)}</span>
               <span class="text-[10px] font-mono text-cyan-400 block mt-0.5">${((l.anomalyScore || 0) * 100).toFixed(0)}% score</span>
             </td>
             <td class="py-2.5 px-3 whitespace-nowrap">
@@ -2270,7 +2270,7 @@
         ['Log_Source', log.lsrc],
         ['Result', log.res],
         ['Severity (Original Excel)', log.sev],
-        ['AI_Risk_Level (Wazuh Level)', `${log.aiRisk} (Level ${wazuhLvl})`],
+        ['Nivel de Riesgo Forense', `${log.aiRisk} (Score: ${((log.anomalyScore || 0) * 100).toFixed(1)}%)`],
         ['Anomaly_Score (Motor Estadístico)', `${((log.anomalyScore || 0) * 100).toFixed(1)}% de desviación`],
         ['Incident_ID & MITRE', `${log.incidentId} · ${log.mitre}`],
         ['Event_Description', log.desc],
